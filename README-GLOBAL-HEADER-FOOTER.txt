@@ -1,20 +1,50 @@
-BRIKITO GLOBAL HEADER + FOOTER SETUP
+BRIKITO GLOBAL HEADER + FOOTER
 
-What changed:
-- Added components/header.html as the single shared header source.
-- Added components/footer.html as the single shared footer source.
-- Added components/global.css for shared responsive styling.
-- Added components/global.js to load the shared components on each page.
-- Updated the main website HTML pages and all seven blog articles to load the shared components.
-- The header/footer Sign in links point to http://3.111.40.151:8083/signup.
+How it works (updated 31 Oct 2026)
+- The header and footer HTML is written directly into every page, so Google
+  and AI search tools (ChatGPT, Perplexity, etc.) can read the menu and footer
+  links without running any script.
+- components/header.html and components/footer.html are the MASTER COPIES.
+  Menu: Features (dropdown: Brik AI, BrikChat, BrikVision, BrikDocs)
+  · Resources (blog.html) · Pricing
+  About us (about.html) is linked from the footer's Explore column.
+- components/global.css styles the header, footer and Features dropdown.
+- components/global.js wires up the mobile menu and the Features dropdown and
+  loads components/tracking.js (Meta Pixel + Google Analytics).
 
-To update later:
-1. Edit components/header.html to change navigation, logo text, or Sign in link.
-2. Edit components/footer.html to change footer text and links.
-3. Edit components/global.css to change shared header/footer styling.
-4. Commit/push the updated files to your website repository.
+Pages (18): index, about, how-it-works, pricing, book-a-demo, privacy, blog, the 7
+blog articles, and the 4 feature pages (brik-ai, brikchat, brikvision,
+brikdocs). "Brikito (standalone).html" is an old export and is left as is.
 
-Important:
-- Upload the whole updated folder contents, including the components/ folder, to the same published website root.
-- This uses fetch() to load shared HTML, so test through GitHub Pages/a web server; it will not load correctly by opening each HTML file directly via file://.
-- This updates the shared header/footer on the 13 main HTML pages and blog articles. Brikito (standalone).html is a separate standalone export and was intentionally left unchanged.
+To change the menu or footer
+1. Edit components/header.html or components/footer.html.
+2. Copy the change into every page by running, from the repo root:
+       python3 tools/sync-header-footer.py
+   (It replaces the header and footer section of all 18 pages with the
+   master copies. Ask Claude to run it if you don't use the command line.)
+3. If you changed global.css or global.js, bump ?v=YYYYMMDD in every page's
+   <link>/<script> tag so browsers load the new version.
+4. Commit, push and open a pull request into aashiq-brikito/Brikito.
+
+Adding a new page
+- Put <div data-global-header></div> and <div data-global-footer></div> where
+  the header and footer go, link components/global.css and global.js, then
+  run the sync script. It swaps the placeholders for the real header/footer.
+
+Clean URLs (no .html in the address)
+- Link to pages without .html, from the site root: /about, /pricing,
+  /brik-ai, /blog-ai-construction; the homepage is / (and /#section).
+- GitHub Pages serves /about from about.html automatically. Old .html
+  links still work, and global.js tidies the address bar to the clean form.
+- Canonical tags, og:url, structured data and sitemap.xml all use the clean
+  URLs. vercel.json turns on the same behaviour for Vercel previews.
+
+SEO settings (titles, descriptions, sharing previews, structured data)
+- tools/seo.py holds every page's title, description, sharing image and
+  structured data in one list (PAGES), and writes them into each page.
+- It also regenerates sitemap.xml from that list.
+- When you add a page or blog post: add it to PAGES, then run
+       python3 tools/seo.py
+  (Ask Claude to do it if you don't use the command line.)
+- Titles: 30-60 characters. Descriptions: 110-160 characters.
+- 404.html is the "page not found" page; it is kept out of Google.
