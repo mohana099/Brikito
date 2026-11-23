@@ -350,6 +350,8 @@ footer{padding:72px 0 36px;border-top:1px solid var(--hair)}.foot-top{display:gr
 
  // Google Apps Script web app that saves each request to the "Brikito – Demo Requests" Google Sheet
  const DEMO_FORM_ENDPOINT='https://script.google.com/macros/s/AKfycbxxAiBit98TmUJIy03P_ACF01zgZFdtxMUm5bkmi3zpIEyyrWDuqpKLVZmYCkmEvUzf/exec';
+ // Make.com webhook: sends the lead an automatic thank-you email (from marketing@brikito.com) with the founder demo booking link
+ const DEMO_EMAIL_WEBHOOK='https://hook.eu1.make.com/5ufcglvwejagmc155utbvwlkfb7u2dc6';
  const submitBtn=form.querySelector('button[type="submit"]');
  const submitLabel=submitBtn.innerHTML;
 
@@ -361,10 +363,14 @@ footer{padding:72px 0 36px;border-top:1px solid var(--hair)}.foot-top{display:gr
   submitBtn.disabled=true;
   submitBtn.textContent='Sending…';
   message.classList.remove('show');
+  // Skip bots that fill the hidden honeypot field
+  if(!data.get('website')){
+   fetch(DEMO_EMAIL_WEBHOOK,{method:'POST',mode:'no-cors',body:new URLSearchParams(data)}).catch(function(){});
+  }
   fetch(DEMO_FORM_ENDPOINT,{method:'POST',mode:'no-cors',body:data})
    .then(function(){
     form.reset();syncOtherRole();syncOtherRegion();
-    message.textContent='Thanks! Your demo request has been received. Our team will contact you within one business day.';
+    message.textContent='Thanks! Your demo request has been received. Check your inbox: we have emailed you a link to book a time with our founder.';
     message.classList.add('show');
     if(window.gtag)gtag('event','generate_lead',{form:'book_a_demo'});
     if(window.fbq)fbq('track','Lead');
